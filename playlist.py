@@ -8,25 +8,9 @@
 import musicbrainzngs as mb
 from pprint import pprint
 
+# testing
 KANYE = '164f0d73-1234-4e2c-8743-d77bf2191051'
 mb.set_useragent('Playlist.py', '0.1', 'https://gmareske.github.io')
-
-# pprint(mb.browse_recordings(KANYE, limit=100, offset=100))
-
-def print_all_release_names(artist):
-    # artist is a mb artist id
-    releases = mb.browse_releases(artist, limit=1,includes=['artist-rels'])
-    pprint(releases)
-    count = releases['release-count']
-    offset = 0
-    names = list()
-    while count > 0:
-        releases = mb.browse_releases(artist, limit=100, offset=offset)
-        names.append([release['title'] for release in releases['release-list']])
-        count -= 100
-
-    pprint(names)
-
 
 # Note: due to mb's api rate limiting, this procedure runs slowly
 # and only make one request per second to avoid getting blacklisted
@@ -52,20 +36,73 @@ def get_all_recordings(artist, includes=['artist-credits']):
     a list of dicts, where each dict is a recording done by (at least)
     the artist
 
+    Postconditions
+    --------------
+    the return value does not contain any duplicate recording titles
+
     '''
-    recs = list()
+    recs = list()  # return value
+    titles = set()  # set of already seen titles to remove duplicates
     recordings = mb.browse_recordings(artist, limit=100,
                                       includes=includes)
     recs += recordings['recording-list']
-    count = recordings['recording-count'] - 100 # already grabbed
+    count = recordings['recording-count'] - 100  # already grabbed
     offset = 100
     while count >= 0:
         recordings = mb.browse_recordings(artist, limit=100,
                                           includes=includes,
                                           offset=offset)
-        recs += recordings['recording-list']
+        # have we already seen a recording of this name?
+        for record in recordings['recording-list']:
+            if not (record['title'] in titles):
+                recs.append(record)
+        # update already seen titles
+        titles.update([record['title']
+                       for record in recordings['recording-list']])
         count -= 100
         print(count)
         offset += 100
 
     return recs
+
+
+# TODO: non-destructive version possibly
+def filter_collabs(recordings):
+    '''
+    From a list of recordings, filters out all recordings
+    except those that are a collaboration between artists.
+    In this case, collabs are anything with less than two
+    artists in the credits
+    Also cleans up junk in artist credits
+
+    Parameters
+    ----------
+    recordings : [{...}]
+      list of dicts that represent a collection of
+      musicbrainz recordings with artist credits
+
+    Returns
+    -------
+    recordings : [{...}]
+      list of dicts that represent a collection of
+      musicbrainz recordings with artist credits
+
+    Postconditions
+    --------------
+    There will only be recordings returned that have more
+    than one artist in the credits.
+    Junk from musicbrainz in the artist-credits will also be
+    removed from all recordings.
+    '''
+    for record in recordings:
+        for artist in record['artist-credit']:
+            # clean up junk in artist credits such as 'feat.'
+            if type(artist) is not dict:
+                del(artist)
+
+        # filter out non-collabs
+        # delete anything that has less than two artist
+        if len(record['artist-credit']) <= 2:
+            del(record)
+
+    return recordings
