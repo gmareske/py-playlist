@@ -46,6 +46,7 @@ def get_all_recordings(artist, includes=['artist-credits']):
     recs += recordings['recording-list']
     count = recordings['recording-count'] - 100  # already grabbed
     offset = 100
+    print('Downloading {}...'.format(artist))
     while count >= 0:
         recordings = mb.browse_recordings(artist, limit=100,
                                           includes=includes,
@@ -58,7 +59,6 @@ def get_all_recordings(artist, includes=['artist-credits']):
         titles.update([record['title']
                        for record in recordings['recording-list']])
         count -= 100
-        print(count)
         offset += 100
 
     return recs
@@ -158,25 +158,20 @@ def gen_playlist(seed, lvl=0, maxlvl=10, previous_ids=[]):
     # add current artists to already-seen ids
     previous_ids.append(seed)
     if lvl == maxlvl:
-        print("Max recursive level")
         return list()
     collabs = filter_collabs(get_all_recordings(seed))
-    # debugging / logging
-    print("Currently on {}:".format(seed))
     if collabs:
         next_song = choice(collabs)
         # all artists on a song except already visited ones
         fartists = [a['id'] for a in get_artists(next_song)
                     if not a['id'] in previous_ids]
         if not fartists:
-            return []  # no more artists to continue the chain :(
+            return list()  # no more artists to continue the chain :(
         next_artist = choice(fartists)
-        print("Next Song: {}".format(next_song))
         return [next_song] + gen_playlist(next_artist, lvl=lvl + 1)
 
     else:
-        print("Artist {} has no collaborations!".format(seed))
-        return []
+        return list()
 
 
 def pprint_playlist(playlist):
