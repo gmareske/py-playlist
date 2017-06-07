@@ -144,7 +144,7 @@ def artists_from_recs(original, recordings):
     return list({a['id']: a for a in artists}.values())
 
 
-def gen_playlist(seed, lvl=0, maxlvl=10, previous_ids=[]):
+def gen_playlist(seed, lvl=0, maxlvl=50, previous_ids=[]):
     '''
     Recursively generates a list of songs
     in order that match my criteria
@@ -156,7 +156,7 @@ def gen_playlist(seed, lvl=0, maxlvl=10, previous_ids=[]):
     -------
     '''
     # add current artists to already-seen ids
-    previous_ids.append(seed)
+    # previous_ids.append(seed)
     if lvl == maxlvl:
         return list()
     collabs = filter_collabs(get_all_recordings(seed))
@@ -168,7 +168,9 @@ def gen_playlist(seed, lvl=0, maxlvl=10, previous_ids=[]):
         if not fartists:
             return list()  # no more artists to continue the chain :(
         next_artist = choice(fartists)
-        return [next_song] + gen_playlist(next_artist, lvl=lvl + 1)
+        previous_ids.append(seed)
+        return [next_song] + gen_playlist(next_artist, lvl=lvl + 1,
+                                          previous_ids=previous_ids)
 
     else:
         return list()
