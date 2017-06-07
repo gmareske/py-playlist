@@ -66,7 +66,6 @@ def get_all_recordings(artist, includes=['artist-credits']):
     return recs
 
 
-# TODO: non-destructive version possibly
 def filter_collabs(recordings):
     '''
     From a list of recordings, filters out all recordings
@@ -95,14 +94,9 @@ def filter_collabs(recordings):
     removed from all recordings.
     '''
     for record in recordings:
-        for artist in record['artist-credit']:
-            # clean up junk in artist credits such as 'feat.'
-            if type(artist) is not dict:
-                del(artist)
+        record['artist-credit'] = [a for a in record['artist-credit']
+                                   if type(a) is dict]
 
         # filter out non-collabs
         # delete anything that has less than two artist
-        if len(record['artist-credit']) <= 2:
-            del(record)
-
-    return recordings
+    return [r for r in recordings if len(r['artist-credit']) >= 2]
