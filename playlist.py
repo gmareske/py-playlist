@@ -1,16 +1,14 @@
 #!/usr/bin/env python
-
-# exploration of musicbrainz api with python
-# goal is to generate a playlist of songs
-# where each song shares one artist in common
-# with the song before and after it
+import sys
 
 import musicbrainzngs as mb
-from pprint import pprint
+from random import choice
 
 # testing
 KANYE = '164f0d73-1234-4e2c-8743-d77bf2191051'
 mb.set_useragent('Playlist.py', '0.1', 'https://gmareske.github.io')
+from pprint import pprint
+import json
 
 # Note: due to mb's api rate limiting, this procedure runs slowly
 # and only make one request per second to avoid getting blacklisted
@@ -96,7 +94,58 @@ def filter_collabs(recordings):
     for record in recordings:
         record['artist-credit'] = [a for a in record['artist-credit']
                                    if type(a) is dict]
-
-        # filter out non-collabs
-        # delete anything that has less than two artist
+    # filter out non-collabs
+    # delete anything that has less than two artist
     return [r for r in recordings if len(r['artist-credit']) >= 2]
+
+def get_artists(recording):
+    '''
+    Returns a list of all artists on one recording
+
+    Parameters
+    ----------
+    recording : {...}
+
+    Returns
+    -------
+    artists : [{...}]
+
+    '''
+    return [a['artist'] for a in recording['artist-credit']]
+
+
+def artists_from_recs(original, recordings):
+    '''
+    Returns a list of all artists featured on all recordings
+    except for the original artist, given as a param
+
+    Parameters
+    ----------
+    original : str
+      a string representing the musicbrainz id of an artist
+    recordings : [{...}]
+      a list of dicts, which holds the musicbrainz recordings
+      with artist credits
+
+    Returns
+    -------
+    artists : [{...}]
+      a list of dicts, where each dict is a musicbrainz artist
+
+    Postconditions
+    --------------
+    artists contains none of original artists
+    each artist is in the return list once
+    '''
+    artists = list()
+    for record in recordings:
+        artists += [a for a in get_artists(record) if not a['id'] == original]
+    # only return unique elements
+    return list({a['id']: a for a in artists}.values())
+
+# if __name__ == '__main__':
+#     if not seed_artist:
+#         seed_artist=input('Enter an artist to start the chain with')
+#     else:
+#         if mbid:
+#             gen_playlist(seed_artist)
