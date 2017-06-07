@@ -143,6 +143,46 @@ def artists_from_recs(original, recordings):
     # only return unique elements
     return list({a['id']: a for a in artists}.values())
 
+
+def gen_playlist(seed, lvl=0, maxlvl=10, previous_ids=[]):
+    '''
+    Recursively generates a list of songs
+    in order that match my criteria
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    '''
+    if lvl == maxlvl:
+        print("Max recursive level")
+        return list()
+    collabs = filter_collabs(get_all_recordings(seed))
+    # debugging / logging
+    print("Currently on {}:".format(seed))
+    if collabs:
+        next_song = choice(collabs)
+        print("Next Song: {}".format(next_song))
+        return [next_song] + gen_playlist(choice(
+            # random artist from next_song, filtering the original artist out
+            [a['id'] for a in get_artists(next_song) if not a['id'] == seed]),
+                                          lvl + 1)  # increase recursive level
+    else:
+        print("Artist {} has no collaborations!".format(seed))
+        return []
+
+
+def pprint_playlist(playlist):
+    print("Begin playlist")
+    print("-" * 20)
+    print("Song: {} - {}".format(
+        playlist[0]['title'], playlist[0]['artist-credit-phrase']))
+
+    for song in playlist[1:]:
+        print("Song: {} - {}".format(
+            song['title'], song['artist-credit-phrase']))
+
 # if __name__ == '__main__':
 #     if not seed_artist:
 #         seed_artist=input('Enter an artist to start the chain with')
