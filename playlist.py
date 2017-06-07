@@ -155,6 +155,8 @@ def gen_playlist(seed, lvl=0, maxlvl=10, previous_ids=[]):
     Returns
     -------
     '''
+    # add current artists to already-seen ids
+    previous_ids.append(seed)
     if lvl == maxlvl:
         print("Max recursive level")
         return list()
@@ -163,11 +165,15 @@ def gen_playlist(seed, lvl=0, maxlvl=10, previous_ids=[]):
     print("Currently on {}:".format(seed))
     if collabs:
         next_song = choice(collabs)
+        # all artists on a song except already visited ones
+        fartists = [a['id'] for a in get_artists(next_song)
+                    if not a['id'] in previous_ids]
+        if not fartists:
+            return []  # no more artists to continue the chain :(
+        next_artist = choice(fartists)
         print("Next Song: {}".format(next_song))
-        return [next_song] + gen_playlist(choice(
-            # random artist from next_song, filtering the original artist out
-            [a['id'] for a in get_artists(next_song) if not a['id'] == seed]),
-                                          lvl + 1)  # increase recursive level
+        return [next_song] + gen_playlist(next_artist, lvl=lvl + 1)
+
     else:
         print("Artist {} has no collaborations!".format(seed))
         return []
