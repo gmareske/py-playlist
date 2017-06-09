@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# playlist.py
+#
+# THE playlist script
+# also contains utilities for working with musicbrainz scripts
+#
+# Author: Griffin Mareske gmareske@gmail.com
 import sys
 
 import musicbrainzngs as mb
@@ -9,6 +15,7 @@ KANYE = '164f0d73-1234-4e2c-8743-d77bf2191051'
 mb.set_useragent('Playlist.py', '0.1', 'https://gmareske.github.io')
 from pprint import pprint
 import json
+
 
 # Note: due to mb's api rate limiting, this procedure runs slowly
 # and only make one request per second to avoid getting blacklisted
