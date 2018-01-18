@@ -9,6 +9,8 @@ Each python file beginning with "week" is an executable program that
 will generate a playlist based on different algorithmic constraints. 
 A short description of each is provided in this readme, but read the
 code to find out how it works internally.
+All other python files (those that don't start with "week") are
+utility scripts for the playlist scripts.
 
 ## Installation
 
