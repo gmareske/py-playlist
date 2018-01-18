@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# playlist.py
+# week1.py
 #
-# THE playlist script
+# The playlist script
 # also contains utilities for working with musicbrainz scripts
 #
 # Author: Griffin Mareske gmareske@gmail.com
@@ -10,12 +10,12 @@ import sys
 import musicbrainzngs as mb
 from random import choice
 
-# testing
-KANYE = '164f0d73-1234-4e2c-8743-d77bf2191051'
-mb.set_useragent('Playlist.py', '0.1', 'https://gmareske.github.io')
 from pprint import pprint
 import json
 
+# set this to your website, so the mb api has something to reference
+USER_WEBSITE = 'https://gmareske.github.io'
+mb.set_useragent('py-playlist', '0.1', USER_WEBSITE)
 
 # Note: due to mb's api rate limiting, this procedure runs slowly
 # and only make one request per second to avoid getting blacklisted
@@ -163,7 +163,7 @@ def gen_playlist(seed, lvl=0, maxlvl=50, previous_ids=[]):
     -------
     '''
     # add current artists to already-seen ids
-    # previous_ids.append(seed)
+    previous_ids.append(seed)
     if lvl == maxlvl:
         return list()
     collabs = filter_collabs(get_all_recordings(seed))
@@ -193,9 +193,28 @@ def pprint_playlist(playlist):
         print("Song: {} - {}".format(
             song['title'], song['artist-credit-phrase']))
 
-# if __name__ == '__main__':
-#     if not seed_artist:
-#         seed_artist=input('Enter an artist to start the chain with')
-#     else:
-#         if mbid:
-#             gen_playlist(seed_artist)
+if __name__ == '__main__':
+    # below are some defined constants to play around with
+
+    # To generate a playlist with your own seed artist,
+    # you need to get the musicbrainz 'id' for that artist
+    # which can be found by searching for the artist on the musicbrainz
+    # website, and copying the id from the url at their page.
+    BOB = '72c536dc-7137-4477-a521-567eeb840fa8'
+    KANYE = '164f0d73-1234-4e2c-8743-d77bf2191051'
+    ORNETTE = '169c0d1b-fcb8-4a43-9097-829aa7b39205'
+    GLASPER = '6e8f82ea-9e6d-4fdd-9b32-32feef13186b'
+    COREA   = '8446fcca-109e-4c6d-a2ff-5a269b32b4c2'
+    HERBIE  = '27613b78-1b9d-4ec3-9db5-fa0743465fdd'
+    EWF     = '535afeda-2538-435d-9dd1-5e10be586774'
+    LENNON  = '4d5447d7-c61c-4120-ba1b-d7f471d385b9'
+    MILES   = '561d854a-6a28-4aa7-8c99-323e6ce46c2a'
+    EAGLES  = 'f46bd570-5768-462e-b84c-c7c993bbf47e'
+    BOWIE   = '5441c29d-3602-4898-b1a1-b77fa23b8e50'
+    WONDER  = '1ee18fb3-18a6-4c7f-8ba0-bc41cdd0462e'
+    ACDC    = '66c662b6-6e2f-4930-8610-912e24c63ed1'
+    MARIAH  = '494e8d09-f85b-4543-892f-a5096aed1cd4'
+    VINCEG  = '05b5488d-7141-4b21-819b-d4713abf2a98'
+
+    # print playlist using seed artist
+    pprint_playlist(gen_playlist(KANYE))
